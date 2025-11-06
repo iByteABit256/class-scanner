@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "org.example"
+group = "org.class_scanner"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -27,6 +27,6 @@ tasks.shadowJar {
     archiveFileName.set("class-scanner-1.0-SNAPSHOT-all.jar")
     mergeServiceFiles()
     manifest {
-        attributes["Main-Class"] = "org.example.MainKt"
+        attributes["Main-Class"] = "org.class_scanner.MainKt"
     }
 }

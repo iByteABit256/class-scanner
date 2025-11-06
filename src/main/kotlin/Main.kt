@@ -1,4 +1,4 @@
-package org.example
+package org.class_scanner
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -7,8 +7,8 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
-import org.example.analyzer.ClassAnalyzer
-import org.example.analyzer.AnalysisResult
+import org.class_scanner.analyzer.ClassAnalyzer
+import org.class_scanner.analyzer.AnalysisResult
 
 class ClassScannerCli : CliktCommand(
     help = """

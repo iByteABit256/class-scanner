@@ -1,4 +1,4 @@
-package org.example
+package org.class_scanner
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature

@@ -1,6 +1,6 @@
-package org.example.maven
+package org.class_scanner.maven
 
-import org.example.utils.SystemUtils
+import org.class_scanner.utils.SystemUtils
 import java.io.File
 
 data class MavenProjectInfo(

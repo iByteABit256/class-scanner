@@ -1,8 +1,8 @@
-package org.example.analyzer
+package org.class_scanner.analyzer
 
-import org.example.ClassScanner
-import org.example.maven.MavenProjectAnalyzer
-import org.example.classfile.ClassFileAnalyzer
+import org.class_scanner.ClassScanner
+import org.class_scanner.maven.MavenProjectAnalyzer
+import org.class_scanner.classfile.ClassFileAnalyzer
 import java.io.File
 import java.net.URLClassLoader
 

@@ -1,4 +1,4 @@
-package org.example.utils
+package org.class_scanner.utils
 
 object SystemUtils {
     fun isWindows(): Boolean {

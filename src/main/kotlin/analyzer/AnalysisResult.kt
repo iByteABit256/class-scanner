@@ -1,4 +1,4 @@
-package org.example.analyzer
+package org.class_scanner.analyzer
 
 sealed class AnalysisResult {
     data class Success(val jsonOutput: String) : AnalysisResult()

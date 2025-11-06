@@ -1,4 +1,4 @@
-package org.example.classfile
+package org.class_scanner.classfile
 
 import java.io.File
 
