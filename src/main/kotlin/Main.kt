@@ -2,9 +2,11 @@ package org.example
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.clikt.parameters.types.int
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
@@ -20,23 +22,35 @@ to the last classes that only contain primitive types or types contained in the 
 Examples:
 
   class-scanner /path/to/project/src/main/java/com/example/MyClass.java
-    
+
   class-scanner /path/to/classes/com/example/MyClass.class
   
   class-scanner /foo/MyClass.java -f output_file.json
+  
+  class-scanner MyClass.java -t 8 -v -f analysis.json
     """.trimIndent(),
     name = "class-scanner"
 ) {
     private val inputFile by argument(help = "Java source file (.java) or compiled class file (.class)").file(mustExist = true)
     private val verbose by option("-v", "--verbose").flag(defaultForHelp = "Enable verbose output")
     private val outputFile by option("-f", "--file", help = "Save output to file instead of stdout").file()
+    private val threads by option("-t", "--threads", help = "Number of threads to use for analysis (default: number of CPU cores)")
+        .int()
+        .default(Runtime.getRuntime().availableProcessors())
 
     override fun run() {
+        // Validate thread count
+        if (threads < 1) {
+            echo("Error: Thread count must be at least 1", err = true)
+            return
+        }
+
         when {
             inputFile.name.endsWith(".java") -> {
                 if (verbose) {
                     echo("Detected Java source file")
                     echo("Processing: ${inputFile.absolutePath}")
+                    echo("Using $threads threads for analysis")
                     outputFile?.let { echo("Output will be saved to: ${it.absolutePath}") }
                 }
                 handleJavaFile()
@@ -45,6 +59,7 @@ Examples:
                 if (verbose) {
                     echo("Detected compiled class file")
                     echo("Processing: ${inputFile.absolutePath}")
+                    echo("Using $threads threads for analysis")
                     outputFile?.let { echo("Output will be saved to: ${it.absolutePath}") }
                 }
                 handleClassFile()
@@ -90,7 +105,7 @@ Examples:
                 echo("Found ${classpathFiles.size} classpath entries")
             }
 
-            scanClass(className, classpathFiles, verbose, outputFile)
+            scanClass(className, classpathFiles, verbose, outputFile, threads)
 
         } catch (e: Exception) {
             echo("Error processing Java file: ${e.message}", err = true)
@@ -114,7 +129,7 @@ Examples:
                 echo("Using ${classpathFiles.size} classpath entries")
             }
 
-            scanClass(className, classpathFiles, verbose, outputFile)
+            scanClass(className, classpathFiles, verbose, outputFile, threads)
 
         } catch (e: Exception) {
             echo("Error processing class file: ${e.message}", err = true)
@@ -127,7 +142,13 @@ Examples:
     /**
      * Common method to scan a class with given classpath
      */
-    private fun scanClass(className: String, classpathFiles: List<File>, verbose: Boolean = false, outputFile: File? = null) {
+    private fun scanClass(
+        className: String,
+        classpathFiles: List<File>,
+        verbose: Boolean = false,
+        outputFile: File? = null,
+        threadCount: Int = Runtime.getRuntime().availableProcessors()
+    ) {
         val urls: Array<URL> = classpathFiles.map { it.toURI().toURL() }.toTypedArray()
         val loader = URLClassLoader(urls, Thread.currentThread().contextClassLoader)
 
@@ -140,10 +161,10 @@ Examples:
 
             if (verbose) {
                 echo("Class loaded successfully")
-                echo("Starting analysis...")
+                echo("Starting multithreaded analysis with $threadCount threads...")
             }
 
-            val scanner = ClassScanner()
+            val scanner = ClassScanner(maxThreads = threadCount, verbose = verbose)
             scanner.scan(clazz)
 
             val jsonOutput = scanner.toJson()
@@ -196,7 +217,7 @@ Examples:
 
             if (verbose) {
                 echo("")
-                echo("🔍 Searched in ${classpathFiles.size} locations:")
+                echo("Searched in ${classpathFiles.size} locations:")
                 classpathFiles.take(5).forEach { echo("  - ${it.absolutePath}") }
                 if (classpathFiles.size > 5) {
                     echo("  ... and ${classpathFiles.size - 5} more locations")
